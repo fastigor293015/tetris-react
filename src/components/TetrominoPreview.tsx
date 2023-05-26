@@ -15,7 +15,7 @@ const TetrominoPreview: FC<TetrominoPreviewProps> = ({ nextTetrominoIndex }) => 
         {TETROMINOS[nextTetrominoIndex].preview.map((row, index) =>
           <React.Fragment key={index}>
             {
-              row.map((cell, index) =>
+              row.map((cell) =>
                 <motion.div
 
                   key={Math.random().toString(36).substring(2, 15)}

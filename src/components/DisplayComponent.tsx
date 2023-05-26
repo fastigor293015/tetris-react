@@ -8,7 +8,7 @@ interface DisplayProps {
   isPaused: boolean;
 }
 
-const DisplayComponent: FC<DisplayProps> = ({ display, setDisplay, isPaused }) => {
+const DisplayComponent: FC<DisplayProps> = ({ display, isPaused }) => {
 
   return (
     <div className="grid grid-cols-[repeat(12,20px)] grid-rows-[repeat(20,20px)] gap-[1px] border-[4px] overflow-hidden border-white rounded-lg">

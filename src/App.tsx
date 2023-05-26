@@ -48,7 +48,7 @@ const App = () => {
   }
 
   const createTetromino = () => {
-    const tetromino = display.addTetromino();
+    display.addTetromino();
     update();
   }
 
