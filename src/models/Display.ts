@@ -78,7 +78,7 @@ export class Display {
   }
 
   public checkRows() {
-    let clearedRowsIndexes: number[] = [];
+    const clearedRowsIndexes: number[] = [];
 
     for (let i = 0; i < this.cells.length; i++) {
       const row = this.cells[i];

@@ -1,15 +1,17 @@
-import React, { useState, useEffect, FC } from 'react';
-import './App.css';
+import React, { useState, useEffect } from 'react';
+import { motion } from 'framer-motion';
+import useInterval from './hooks/useInterval';
+import { Display } from './models/Display';
+
 import Controls from './components/Controls';
 import DisplayComponent from './components/DisplayComponent';
 import TetrominoPreview from './components/TetrominoPreview';
 import Timer from './components/Timer';
-import { useInterval } from './hooks/useInterval';
-import { PauseIcon, PlayIcon } from './icons';
-import { Display } from './models/Display';
+import PlayButton from './components/PlayButton';
+
 import { DISPLAY_HEIGHT, DISPLAY_WIDTH, TETROMINO_DROP_TIME } from './setup';
 
-const App: FC = () => {
+const App = () => {
   const [isStarted, setIsStarted] = useState(false);
   const [isPaused, setIsPaused] = useState(false);
   const [display, setDisplay] = useState(new Display(DISPLAY_WIDTH, DISPLAY_HEIGHT));
@@ -25,9 +27,10 @@ const App: FC = () => {
 
   useInterval(() => {
     moveTetromino();
-  }, dropTime);
+  }, isPaused ? null : dropTime);
 
-  function start() {
+  const start = () => {
+    setIsStarted(true);
     setTime(0);
 
     const newDisplay = new Display(DISPLAY_WIDTH, DISPLAY_HEIGHT);
@@ -38,18 +41,18 @@ const App: FC = () => {
     createTetromino();
   }
 
-  function update() {
+  const update = () => {
     const newDisplay = display.getCopyDisplay();
     setDisplay(newDisplay);
     console.log(display);
   }
 
-  function createTetromino() {
+  const createTetromino = () => {
     const tetromino = display.addTetromino();
     update();
   }
 
-  function keyDownHandler(e: React.KeyboardEvent) {
+  const keyDownHandler = (e: React.KeyboardEvent) => {
     console.log(e.key);
     if (e.key === 'p' || e.key === 'з') {
       setIsPaused(!isPaused);
@@ -69,47 +72,47 @@ const App: FC = () => {
     }
   }
 
-  function arrowUpHandler() {
+  const arrowUpHandler = () => {
     if (!isStarted || isPaused) return;
     console.log('-------------------Поворачиваем-------------------');
     display.tetromino.turn();
     update();
   }
 
-  function arrowRightHandler() {
+  const arrowRightHandler = () => {
     if (!isStarted || isPaused) return;
     console.log('-------------------Вправо-------------------');
     display.tetromino.moveRight();
     update();
   }
 
-  function arrowDownHandler() {
+  const arrowDownHandler = () => {
     if (!isStarted || isPaused) return;
     console.log('-------------------Вниз-------------------');
     setDropTime(TETROMINO_DROP_TIME / 15);
     update();
   }
 
-  function arrowLeftHandler() {
+  const arrowLeftHandler = () => {
     if (!isStarted || isPaused) return;
     console.log('-------------------Влево-------------------');
     display.tetromino.moveLeft();
     update();
   }
 
-  function mouseUpHandler() {
+  const mouseUpHandler = () => {
     setDropTime(TETROMINO_DROP_TIME);
     update();
   }
 
-  function keyUpHandler(e: React.KeyboardEvent) {
+  const keyUpHandler = (e: React.KeyboardEvent) => {
     if (e.key === 'ArrowDown') {
       setDropTime(TETROMINO_DROP_TIME);
       update();
     }
   }
 
-  function moveTetromino() {
+  const moveTetromino = () => {
     if (!isStarted || isPaused) return;
     display.tetromino.moveDown();
     if (display.tetromino.landed) {
@@ -119,22 +122,34 @@ const App: FC = () => {
   }
 
   return (
-    <div className="app" tabIndex={-1} onKeyDown={keyDownHandler} onKeyUp={keyUpHandler}>
-      <div className="container">
-        <div className={['top', !isStarted ? 'start' : ''].join(' ')}>
-          { isStarted && <Timer time={time} setTime={setTime} isPaused={isPaused} /> }
-          { isStarted &&
-            <button className="pause-btn" onClick={() => {setIsPaused(!isPaused)}}>
-              { !isPaused && <PauseIcon width={30} height={30} /> }
-              { isPaused && <PlayIcon width={30} height={30} /> }
-            </button>
-          }
-          { isStarted && <div className="rows-count">Rows: {display.clearedRows}</div> }
-          { !isStarted && <button className="start-btn" onClick={() => {setIsStarted(true); start();}} onKeyDown={keyDownHandler}>Start game</button> }
+    <div className="flex items-center justify-center min-h-screen" tabIndex={-1} onKeyDown={keyDownHandler} onKeyUp={keyUpHandler}>
+      <div className="flex">
+        <div>
+          <div className="flex items-center justify-between gap-2 mb-6">
+            {isStarted && <Timer time={time} setTime={setTime} isPaused={isPaused} />}
+            <PlayButton
+              isPaused={isPaused}
+              switchFn={() => !isStarted ? start() : setIsPaused(!isPaused)}
+              text={!isStarted ? "Start game" : null}
+            />
+            {isStarted && <motion.div
+              className="flex items-center justify-center h-12 w-24 border border-white rounded-lg text-white bg-black"
+              initial={{ opacity: 0, x: "-100%" }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ type: "keyframes", delay: .2, duration: .3 }}
+            >Rows: {display.clearedRows}</motion.div>}
+          </div>
+          <DisplayComponent display={display} setDisplay={setDisplay} isPaused={isPaused} />
         </div>
-        <DisplayComponent display={display} setDisplay={setDisplay} isPaused={isPaused} />
-        { isStarted && <TetrominoPreview nextTetrominoIndex={display.lastThreeIndexesArr[0]} /> }
-        { isStarted && <Controls arrowUpHandler={arrowUpHandler} arrowRightHandler={arrowRightHandler} arrowDownHandler={arrowDownHandler} arrowLeftHandler={arrowLeftHandler} mouseUpHandler={mouseUpHandler} /> }
+        {isStarted && <motion.div
+          className="flex flex-col items-center justify-center gap-32 overflow-hidden"
+          initial={{ maxWidth: 0, padding: 0 }}
+          animate={{ maxWidth: 1000, padding: "0 48px" }}
+          transition={{ delay: .2, duration: .4, type: "keyframes" }}
+        >
+          <TetrominoPreview nextTetrominoIndex={display.lastThreeIndexesArr[0]} />
+          <Controls arrowUpHandler={arrowUpHandler} arrowRightHandler={arrowRightHandler} arrowDownHandler={arrowDownHandler} arrowLeftHandler={arrowLeftHandler} mouseUpHandler={mouseUpHandler} />
+        </motion.div>}
       </div>
     </div>
   );

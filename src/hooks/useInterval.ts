@@ -1,22 +1,27 @@
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef } from "react";
 
-export function useInterval(callback: () => void, delay: number | null) {
-  const savedCallback = useRef<null | (() => void)>(null);
-  // Remember the latest callback.
-  useEffect(() => {
-    savedCallback.current = callback;
-  }, [callback]);
+import { useIsomorphicLayoutEffect } from "usehooks-ts";
+
+function useInterval(callback: () => void, delay: number | null) {
+  const savedCallback = useRef(callback)
+
+  // Remember the latest callback if it changes.
+  useIsomorphicLayoutEffect(() => {
+    savedCallback.current = callback
+  }, [callback])
 
   // Set up the interval.
   useEffect(() => {
-    function tick(): void {
-      if (savedCallback.current) savedCallback.current();
+    // Don't schedule if no delay is specified.
+    // Note: 0 is a valid value for delay.
+    if (!delay && delay !== 0) {
+      return
     }
-    if (delay !== null) {
-      const id = setInterval(tick, delay);
-      return () => {
-        clearInterval(id);
-      };
-    }
-  }, [delay]);
+
+    const id = setInterval(() => savedCallback.current(), delay)
+
+    return () => clearInterval(id)
+  }, [delay])
 }
+
+export default useInterval;

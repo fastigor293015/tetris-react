@@ -1,6 +1,6 @@
-import React, { FC, useRef, useEffect } from 'react';
-import { Display } from '../models/Display';
-import CellComponent from './CellComponent';
+import React, { FC } from "react";
+import { Display } from "../models/Display";
+import CellComponent from "./CellComponent";
 
 interface DisplayProps {
   display: Display;
@@ -9,31 +9,20 @@ interface DisplayProps {
 }
 
 const DisplayComponent: FC<DisplayProps> = ({ display, setDisplay, isPaused }) => {
-  // const timer = useRef<null | ReturnType<typeof setInterval>>(null);
-
-  // useEffect(() => {
-  //   timer.current = setInterval(update, 5000)
-  // }, [])
-
-  // function update() {
-  //   const newDisplay = display.getCopyDisplay();
-  //   setDisplay(newDisplay);
-  //   console.log(display);
-  // }
 
   return (
-    <div className="display">
+    <div className="grid grid-cols-[repeat(12,20px)] grid-rows-[repeat(20,20px)] gap-[1px] border-[4px] overflow-hidden border-white rounded-lg">
       { isPaused &&
-        <div className="modal">
+        <div className="hidden">
           Paused
         </div>
       }
       {
-        display.cells.map((row, index) =>
-          <React.Fragment key={index}>
+        display.cells.map((row, i) =>
+          <React.Fragment key={i}>
             {
-              row.map(cell =>
-                <CellComponent key={cell.id} cell={cell} />
+              row.map((cell, i) =>
+                <CellComponent key={cell.id} cell={cell} index={i} />
               )
             }
           </React.Fragment>

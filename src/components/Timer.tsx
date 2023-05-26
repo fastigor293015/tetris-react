@@ -1,5 +1,6 @@
-import React, { FC, useRef, useEffect } from 'react';
-import { useInterval } from '../hooks/useInterval';
+import React, { FC } from "react";
+import { motion } from "framer-motion";
+import useInterval from "../hooks/useInterval";
 
 interface TimerProps {
   time: number;
@@ -8,23 +9,12 @@ interface TimerProps {
 }
 
 const Timer: FC<TimerProps> = ({ time, setTime, isPaused }) => {
-  // const [time, setTime] = useState(0);
-  const timer = useRef<ReturnType<typeof setInterval>>(null!);
-
-  useEffect(() => {
-    // clearInterval(timer.current);
-    // timer.current = setInterval(() => {
-
-    // }, 1000);
-  }, [])
 
   useInterval(() => {
-    if (!isPaused) {
-      setTime(prev => prev + 1);
-    }
-  }, 1000)
+    setTime(prev => prev + 1);
+  }, isPaused ? null : 1000);
 
-  function getFormattedTime(): string {
+  const formatTime = () => {
     const min = Math.floor(time / 60),
           sec = time - min * 60;
 
@@ -32,9 +22,14 @@ const Timer: FC<TimerProps> = ({ time, setTime, isPaused }) => {
 }
 
   return (
-    <div className="timer">
-      {getFormattedTime()}
-    </div>
+    <motion.div
+      className="flex items-center justify-center h-12 w-24 border border-white rounded-lg text-white bg-black"
+      initial={{ opacity: 0, x: "100%" }}
+      animate={{ opacity: 1, x: 0 }}
+      transition={{ type: "keyframes", delay: .2, duration: .3 }}
+    >
+      {formatTime()}
+    </motion.div>
   );
 }
 

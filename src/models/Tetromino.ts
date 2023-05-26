@@ -36,7 +36,7 @@ export class Tetromino {
     if (this.landed) return;
     this.turnsCount < 3 ? this.turnsCount++ : this.turnsCount = 0;
     this.tetrominoCells = this.tetrominoCells.map(cell => { cell.color = EColors.BLACK; return cell; })
-    let newCellsArr = this.turnsArr[this.turnsCount];
+    const newCellsArr = this.turnsArr[this.turnsCount];
     console.log('До:');
     console.log(newCellsArr);
     while (newCellsArr.findIndex(item => item.x < 0) >= 0) {

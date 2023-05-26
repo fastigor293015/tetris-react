@@ -1,5 +1,5 @@
-import React, { FC } from 'react';
-import { ArrowUp } from '../icons';
+import React, { FC } from "react";
+import { BsFillArrowUpSquareFill, BsFillArrowRightSquareFill, BsFillArrowDownSquareFill, BsFillArrowLeftSquareFill } from "react-icons/bs";
 
 interface ControlsProps {
   arrowUpHandler: () => void;
@@ -11,18 +11,18 @@ interface ControlsProps {
 
 const Controls: FC<ControlsProps> = ({ arrowUpHandler, arrowRightHandler, arrowDownHandler, arrowLeftHandler, mouseUpHandler }) => {
   return (
-    <div className="controls">
-      <button className="controls-btn up" onClick={arrowUpHandler}>
-        <ArrowUp width={20} height={20} />
+    <div className="relative">
+      <button className="absolute border border-white rounded-lg overflow-hidden bg-white -translate-y-[95%] -translate-x-1/2" onClick={arrowUpHandler}>
+        <BsFillArrowUpSquareFill size={40} />
       </button>
-      <button className="controls-btn right" onClick={arrowRightHandler}>
-        <ArrowUp width={20} height={20} />
+      <button className="absolute border border-white rounded-lg overflow-hidden bg-white translate-x-[45%]" onClick={arrowRightHandler}>
+        <BsFillArrowRightSquareFill size={40} />
       </button>
-      <button className="controls-btn down" onMouseDown={arrowDownHandler} onMouseUp={mouseUpHandler} onTouchStart={arrowDownHandler}>
-        <ArrowUp width={20} height={20} />
+      <button className="absolute border border-white rounded-lg overflow-hidden bg-white translate-y-[95%] -translate-x-1/2" onMouseDown={arrowDownHandler} onMouseUp={mouseUpHandler} onTouchStart={arrowDownHandler}>
+        <BsFillArrowDownSquareFill size={40} />
       </button>
-      <button className="controls-btn left" onClick={arrowLeftHandler}>
-        <ArrowUp width={20} height={20} />
+      <button className="absolute border border-white rounded-lg overflow-hidden bg-white -translate-x-[145%]" onClick={arrowLeftHandler}>
+        <BsFillArrowLeftSquareFill size={40} />
       </button>
 
     </div>

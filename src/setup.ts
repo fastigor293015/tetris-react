@@ -1,8 +1,8 @@
 import { EColors } from "./models/EColors";
 
-export const DISPLAY_WIDTH: number = 12;
-export const DISPLAY_HEIGHT: number = 20;
-export const TETROMINO_DROP_TIME: number = 1000;
+export const DISPLAY_WIDTH = 12;
+export const DISPLAY_HEIGHT = 20;
+export const TETROMINO_DROP_TIME = 1000;
 
 export const TETROMINOS = [
   {
