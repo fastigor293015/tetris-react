@@ -12,23 +12,15 @@ const PlayButton: React.FC<PlayButtonProps> = ({
   switchFn,
   text,
 }) => {
-  if (text) {
-    return (
-      <button className="w-full p-2 border border-white rounded-lg text-white bg-black" onClick={() => switchFn()}>
-        {text}
-      </button>
-    )
-  }
-
   return (
-    // <button className="p-2 border border-white rounded-lg text-white bg-black" onClick={() => switchFn()}>
-    //   { !isPaused && <CgPlayPauseO size={30} /> }
-    //   { isPaused && <CgPlayButtonO size={30} /> }
-    // </button>
-
-    <button className="p-2 border border-white rounded-lg text-white bg-black" onClick={() => switchFn()}>
-      { !isPaused && <BsFillPauseFill size={30} /> }
-      { isPaused && <BsFillPlayFill size={30} /> }
+    <button className={`p-2 border border-white rounded-lg text-white bg-black transition duration-1000 ${text ? "w-full" : "w-12"}`} onClick={() => switchFn()}>
+      {text ? (
+        text
+      ) : (
+        <>
+          {isPaused ? <BsFillPlayFill size={30} /> : <BsFillPauseFill size={30} />}
+        </>
+      )}
     </button>
   );
 }

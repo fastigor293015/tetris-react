@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { motion } from 'framer-motion';
 import useInterval from './hooks/useInterval';
 import { Display } from './models/Display';
@@ -29,7 +29,18 @@ const App = () => {
     moveTetromino();
   }, isPaused ? null : dropTime);
 
-  const start = () => {
+  const update = useCallback(() => {
+    const newDisplay = display.getCopyDisplay();
+    setDisplay(newDisplay);
+    console.log(display);
+  }, [display]);
+
+  const createTetromino = useCallback(() => {
+    display.addTetromino();
+    update();
+  }, [display, update]);
+
+  const start = useCallback(() => {
     setIsStarted(true);
     setTime(0);
 
@@ -39,20 +50,37 @@ const App = () => {
 
     console.log(display);
     createTetromino();
-  }
+  }, [createTetromino, display]);
 
-  const update = () => {
-    const newDisplay = display.getCopyDisplay();
-    setDisplay(newDisplay);
-    console.log(display);
-  }
+  const arrowUpHandler = useCallback(() => {
+    if (!isStarted || isPaused) return;
+      console.log('-------------------Поворачиваем-------------------');
+      display.tetromino.turn();
+      update();
+    }, [isStarted, isPaused, update, display]);
 
-  const createTetromino = () => {
-    display.addTetromino();
-    update();
-  }
+    const arrowRightHandler = useCallback(() => {
+      if (!isStarted || isPaused) return;
+      console.log('-------------------Вправо-------------------');
+      display.tetromino.moveRight();
+      update();
+    }, [isStarted, isPaused, update, display]);
 
-  const keyDownHandler = (e: React.KeyboardEvent) => {
+    const arrowDownHandler = useCallback(() => {
+      if (!isStarted || isPaused) return;
+      console.log('-------------------Вниз-------------------');
+      setDropTime(TETROMINO_DROP_TIME / 15);
+      update();
+    }, [isStarted, isPaused, update]);
+
+    const arrowLeftHandler = useCallback(() => {
+      if (!isStarted || isPaused) return;
+      console.log('-------------------Влево-------------------');
+      display.tetromino.moveLeft();
+      update();
+    }, [isStarted, isPaused, update, display]);
+
+  const keyDownHandler = useCallback((e: React.KeyboardEvent) => {
     console.log(e.key);
     if (e.key === 'p' || e.key === 'з') {
       setIsPaused(!isPaused);
@@ -70,56 +98,28 @@ const App = () => {
     if (e.key === 'ArrowUp') {
       arrowUpHandler();
     }
-  }
+  }, [isPaused, isStarted, arrowUpHandler, arrowRightHandler, arrowDownHandler, arrowLeftHandler]);
 
-  const arrowUpHandler = () => {
-    if (!isStarted || isPaused) return;
-    console.log('-------------------Поворачиваем-------------------');
-    display.tetromino.turn();
-    update();
-  }
-
-  const arrowRightHandler = () => {
-    if (!isStarted || isPaused) return;
-    console.log('-------------------Вправо-------------------');
-    display.tetromino.moveRight();
-    update();
-  }
-
-  const arrowDownHandler = () => {
-    if (!isStarted || isPaused) return;
-    console.log('-------------------Вниз-------------------');
-    setDropTime(TETROMINO_DROP_TIME / 15);
-    update();
-  }
-
-  const arrowLeftHandler = () => {
-    if (!isStarted || isPaused) return;
-    console.log('-------------------Влево-------------------');
-    display.tetromino.moveLeft();
-    update();
-  }
-
-  const mouseUpHandler = () => {
+  const mouseUpHandler = useCallback(() => {
     setDropTime(TETROMINO_DROP_TIME);
     update();
-  }
+  }, [update]);
 
-  const keyUpHandler = (e: React.KeyboardEvent) => {
+  const keyUpHandler = useCallback((e: React.KeyboardEvent) => {
     if (e.key === 'ArrowDown') {
       setDropTime(TETROMINO_DROP_TIME);
       update();
     }
-  }
+  }, [update]);
 
-  const moveTetromino = () => {
+  const moveTetromino = useCallback(() => {
     if (!isStarted || isPaused) return;
     display.tetromino.moveDown();
     if (display.tetromino.landed) {
       createTetromino();
     }
     update();
-  }
+  }, [isStarted, isPaused, display, update, createTetromino]);
 
   return (
     <div className="flex items-center justify-center min-h-screen" tabIndex={-1} onKeyDown={keyDownHandler} onKeyUp={keyUpHandler}>
@@ -133,10 +133,10 @@ const App = () => {
               text={!isStarted ? "Start game" : null}
             />
             {isStarted && <motion.div
-              className="flex items-center justify-center h-12 w-24 border border-white rounded-lg text-white bg-black"
-              initial={{ opacity: 0, x: "-100%" }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ type: "keyframes", delay: .2, duration: .3 }}
+              className="flex items-center justify-center h-12 border border-white rounded-lg text-white bg-black"
+              initial={{ width: 0, opacity: 0, x: "-100%" }}
+              animate={{ width: 96, opacity: 1, x: 0 }}
+              transition={{ type: "keyframes", delay: .3, duration: .3 }}
             >Rows: {display.clearedRows}</motion.div>}
           </div>
           <DisplayComponent display={display} setDisplay={setDisplay} isPaused={isPaused} />
