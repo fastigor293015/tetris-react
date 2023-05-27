@@ -1,4 +1,5 @@
-import { CgPlayButtonO, CgPlayPauseO } from "react-icons/cg";
+import { BsFillPauseFill, BsFillPlayFill } from "react-icons/bs";
+// import { CgPlayButtonO, CgPlayPauseO } from "react-icons/cg";
 
 interface PlayButtonProps {
   isPaused: boolean;
@@ -20,9 +21,14 @@ const PlayButton: React.FC<PlayButtonProps> = ({
   }
 
   return (
+    // <button className="p-2 border border-white rounded-lg text-white bg-black" onClick={() => switchFn()}>
+    //   { !isPaused && <CgPlayPauseO size={30} /> }
+    //   { isPaused && <CgPlayButtonO size={30} /> }
+    // </button>
+
     <button className="p-2 border border-white rounded-lg text-white bg-black" onClick={() => switchFn()}>
-      { !isPaused && <CgPlayPauseO size={30} /> }
-      { isPaused && <CgPlayButtonO size={30} /> }
+      { !isPaused && <BsFillPauseFill size={30} /> }
+      { isPaused && <BsFillPlayFill size={30} /> }
     </button>
   );
 }

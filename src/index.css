@@ -18,9 +18,10 @@ body,
 
 body {
   font-family: 'Montserrat', sans-serif;
-  background: url(./assets/img/bg.jpg) center center no-repeat;
+  background: rgba(0, 0, 0, .4) url(./assets/img/neon-bg.jpg) center center no-repeat;
   background-size: cover;
   background-attachment: fixed;
+  background-blend-mode: multiply;
 }
 
 /* .app {

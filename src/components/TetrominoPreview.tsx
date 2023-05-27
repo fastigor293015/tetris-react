@@ -19,11 +19,17 @@ const TetrominoPreview: FC<TetrominoPreviewProps> = ({ nextTetrominoIndex }) => 
                 <motion.div
 
                   key={Math.random().toString(36).substring(2, 15)}
-                  className={['cell', cell === 1 ? TETROMINOS[nextTetrominoIndex].color : EColors.BLACK].join(' ')}
+                  className={`flex items-center justify-center bg-black ${cell === 1 ? TETROMINOS[nextTetrominoIndex].color : EColors.BLACK}`}
                   // initial={{ scale: 0 }}
                   // animate={{ scale: "100%" }}
                   // transition={{ delay: index * .1 }}
-                ></motion.div>
+                >
+                  <div
+                    className="h-[90%] w-[90%] p-[2px] border-[3px] border-current rounded-md"
+                  >
+                    <div className="w-full h-full rounded-[4px] bg-current"></div>
+                  </div>
+                </motion.div>
               )
             }
           </React.Fragment>
