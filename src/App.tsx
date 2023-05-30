@@ -207,7 +207,7 @@ const App = () => {
             >Rows: {display.clearedRows}</motion.div>}
           </div>
           <div onTouchStart={touchStartHandler} onTouchMove={touchMoveHandler} onTouchEnd={touchEndHandler}>
-            <DisplayComponent display={display} setDisplay={setDisplay} isPaused={isPaused} />
+            <DisplayComponent display={display} setDisplay={setDisplay} />
           </div>
         </div>
         {isStarted && <motion.div
