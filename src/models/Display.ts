@@ -88,7 +88,7 @@ export class Display {
           row[j].color = EColors.BLACK;
         }
         clearedRowsIndexes.push(i);
-        console.log('Вы зачистили строчку');
+        console.log('Вы зачистили линию');
         this.clearedRows++;
       }
     }

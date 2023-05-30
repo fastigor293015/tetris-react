@@ -1,5 +1,6 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { motion } from 'framer-motion';
+import { VscDebugRestart } from "react-icons/vsc";
 import useInterval from './hooks/useInterval';
 import { Display } from './models/Display';
 
@@ -28,6 +29,10 @@ const App = () => {
   ]);
   const [movingXRatio, setMovingXRatio] = useState(0);
 
+  const level = useMemo(() => {
+    return Math.floor(display.clearedRows / 10);
+  }, [display.clearedRows]);
+
   useEffect(() => {
     if (!isStarted) {
       display.initCells();
@@ -42,7 +47,6 @@ const App = () => {
   const update = useCallback(() => {
     const newDisplay = display.getCopyDisplay();
     setDisplay(newDisplay);
-    console.log(display);
   }, [display]);
 
   const createTetromino = useCallback(() => {
@@ -52,42 +56,37 @@ const App = () => {
 
   const start = useCallback(() => {
     setIsStarted(true);
+    setIsPaused(false);
     setTime(0);
 
     const newDisplay = new Display(DISPLAY_WIDTH, DISPLAY_HEIGHT);
     setDisplay(newDisplay);
     display.initCells();
 
-    console.log(display);
     createTetromino();
   }, [createTetromino, display]);
 
   const arrowUpHandler = useCallback(() => {
-    console.log('-------------------Поворачиваем-------------------');
     display.tetromino.turn();
     update();
   }, [update, display]);
 
   const arrowRightHandler = useCallback(() => {
-    console.log('-------------------Вправо-------------------');
     display.tetromino.moveRight();
     update();
   }, [update, display]);
 
   const arrowDownHandler = useCallback(() => {
-    console.log('-------------------Вниз-------------------');
     setDropTime(TETROMINO_DROP_TIME / 15);
     update();
   }, [update]);
 
   const arrowLeftHandler = useCallback(() => {
-    console.log('-------------------Влево-------------------');
     display.tetromino.moveLeft();
     update();
   }, [update, display]);
 
   const keyDownHandler = useCallback((e: React.KeyboardEvent) => {
-    console.log(e.key);
     if (e.key === 'p' || e.key === 'з') {
       setIsPaused(!isPaused);
     }
@@ -125,7 +124,6 @@ const App = () => {
   const touchStartHandler = useCallback((e: React.TouchEvent<HTMLDivElement>) => {
     if (!isStarted || isPaused) return;
 
-    console.log("TOUCH START");
     setTouchPoints([
       {
         x: e.changedTouches[0].clientX,
@@ -136,14 +134,10 @@ const App = () => {
         y: e.changedTouches[0].clientY,
       }
     ]);
-    console.log("x: ", e.changedTouches[0].clientX, ";    y: ", e.changedTouches[0].clientY);
   }, [isStarted, isPaused]);
 
   const touchMoveHandler = useCallback((e: React.TouchEvent<HTMLDivElement>) => {
     if (!isStarted || isPaused) return;
-
-    console.log("TOUCH MOVE");
-    console.log("x: ", e.changedTouches[0].clientX, ";    y: ", e.changedTouches[0].clientY);
 
     setTouchPoints(prev => [
       {
@@ -167,18 +161,15 @@ const App = () => {
     }
     setMovingXRatio(newMovingXRatio);
 
-    if (dy > 20) {
+    if (dy > 30) {
       setDropTime(TETROMINO_DROP_TIME / 15);
     } else {
       setDropTime(TETROMINO_DROP_TIME);
     }
   }, [isStarted, isPaused, touchPoints, movingXRatio, arrowRightHandler, arrowLeftHandler]);
 
-  const touchEndHandler = useCallback((e: React.TouchEvent<HTMLDivElement>) => {
+  const touchEndHandler = useCallback(() => {
     if (!isStarted || isPaused) return;
-
-    console.log("TOUCH END");
-    console.log("x: ", e.changedTouches[0].clientX, ";    y: ", e.changedTouches[0].clientY);
 
     setDropTime(TETROMINO_DROP_TIME);
 
@@ -192,31 +183,59 @@ const App = () => {
     <div className="flex items-center justify-center min-h-screen" tabIndex={-1} onKeyDown={keyDownHandler} onKeyUp={keyUpHandler}>
       <div className="flex">
         <div>
-          <div className="flex items-center justify-between gap-2 mb-6">
+          <div className="flex items-center justify-center gap-2 mb-6">
             {isStarted && <Timer time={time} setTime={setTime} isPaused={isPaused} />}
             <PlayButton
               isPaused={isPaused}
               switchFn={() => !isStarted ? start() : setIsPaused(!isPaused)}
               text={!isStarted ? "Start game" : null}
             />
-            {isStarted && <motion.div
-              className="flex items-center justify-center h-12 border border-white rounded-lg text-white bg-black"
+
+            {isStarted && <motion.button
               initial={{ width: 0, opacity: 0, x: "-100%" }}
-              animate={{ width: 96, opacity: 1, x: 0 }}
+              animate={{ width: 48, opacity: 1, x: 0 }}
               transition={{ type: "keyframes", delay: .3, duration: .3 }}
-            >Rows: {display.clearedRows}</motion.div>}
+              className="flex items-center justify-center w-12 h-12 border border-white rounded-lg text-white bg-black"
+              onClick={start}
+            >
+              <VscDebugRestart size={24} />
+            </motion.button>}
           </div>
           <div onTouchStart={touchStartHandler} onTouchMove={touchMoveHandler} onTouchEnd={touchEndHandler}>
             <DisplayComponent display={display} setDisplay={setDisplay} />
           </div>
         </div>
         {isStarted && <motion.div
-          className="flex flex-col items-center justify-center gap-32 overflow-hidden"
-          initial={{ maxWidth: 0, padding: 0 }}
-          animate={{ maxWidth: 1000, padding: "0 48px" }}
+          className="flex flex-col items-center gap-12 mt-[72px] overflow-hidden"
+          initial={{ maxWidth: 0, marginLeft: 0 }}
+          animate={{ maxWidth: 1000, marginLeft: 24 }}
           transition={{ delay: .2, duration: .4, type: "keyframes" }}
         >
           <TetrominoPreview nextTetrominoIndex={display.lastThreeIndexesArr[0]} />
+          <div className="flex flex-col gap-3">
+            <motion.div
+              initial={{ opacity: 0, x: "-100%" }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ type: "keyframes", delay: .3, duration: .3 }}
+              className="flex items-center justify-center h-12 w-32 border border-white rounded-lg text-white bg-black"
+            >
+              Score: {level}
+            </motion.div>
+            <motion.div
+              className="flex items-center justify-center h-12 border border-white rounded-lg text-white bg-black"
+              initial={{ opacity: 0, x: "-100%" }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ type: "keyframes", delay: .5, duration: .3 }}
+            >Rows: {display.clearedRows}</motion.div>
+            <motion.div
+              className="flex items-center justify-center h-12 w-32 border border-white rounded-lg text-white bg-black"
+              initial={{ opacity: 0, x: "-100%" }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ type: "keyframes", delay: .7, duration: .3 }}
+            >
+              Level: {level}
+            </motion.div>
+          </div>
         </motion.div>}
       </div>
     </div>

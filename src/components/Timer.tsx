@@ -1,5 +1,6 @@
 import React, { FC, useCallback } from "react";
 import { motion } from "framer-motion";
+import { TbClockHour4 } from "react-icons/tb";
 import useInterval from "../hooks/useInterval";
 
 interface TimerProps {
@@ -23,11 +24,12 @@ const Timer: FC<TimerProps> = ({ time, setTime, isPaused }) => {
 
   return (
     <motion.div
-      className="flex items-center justify-center h-12 border border-white rounded-lg text-white bg-black"
+      className="grow flex items-center justify-center gap-1 h-12 border border-white rounded-lg text-white bg-black"
       initial={{ width: 0, opacity: 0, x: "100%" }}
       animate={{ width: 96, opacity: 1, x: 0 }}
       transition={{ type: "keyframes", delay: .3, duration: .3 }}
     >
+      <TbClockHour4 size={24} />
       {formatTime()}
     </motion.div>
   );

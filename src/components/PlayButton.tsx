@@ -1,5 +1,5 @@
 import { BsFillPauseFill, BsFillPlayFill } from "react-icons/bs";
-// import { CgPlayButtonO, CgPlayPauseO } from "react-icons/cg";
+import { AnimatePresence, motion } from "framer-motion";
 
 interface PlayButtonProps {
   isPaused: boolean;
@@ -13,7 +13,13 @@ const PlayButton: React.FC<PlayButtonProps> = ({
   text,
 }) => {
   return (
-    <button className={`p-2 border border-white rounded-lg text-white bg-black transition duration-1000 ${text ? "w-full" : "w-12"}`} onClick={() => switchFn()}>
+    <motion.button
+      initial={{ width: 0 }}
+      animate={{ width: text ? "100%" : "48px" }}
+      transition={{ delay: .3, duration: .3, type: "keyframes" }}
+      className={`flex items-center justify-center h-12 border border-white rounded-lg text-white bg-black overflow-hidden`}
+      onClick={() => switchFn()}
+    >
       {text ? (
         text
       ) : (
@@ -21,7 +27,7 @@ const PlayButton: React.FC<PlayButtonProps> = ({
           {isPaused ? <BsFillPlayFill size={30} /> : <BsFillPauseFill size={30} />}
         </>
       )}
-    </button>
+    </motion.button>
   );
 }
 
