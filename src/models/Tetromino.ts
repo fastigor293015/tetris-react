@@ -28,8 +28,6 @@ export class Tetromino {
       });
     this.turnsCount = 0;
     this.landed = false;
-    console.log('Лог из конструктора:');
-    console.log(this.turnsArr);
   }
 
   turn() {
