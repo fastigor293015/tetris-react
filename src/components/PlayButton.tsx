@@ -1,5 +1,5 @@
 import { BsFillPauseFill, BsFillPlayFill } from "react-icons/bs";
-import { AnimatePresence, motion } from "framer-motion";
+import { motion } from "framer-motion";
 
 interface PlayButtonProps {
   isPaused: boolean;
