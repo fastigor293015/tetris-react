@@ -10,6 +10,7 @@ export class Display {
   tetromino: Tetromino;
   lastThreeIndexesArr: Array<number>;
   clearedRows: number;
+  isLost: boolean;
 
   constructor(width: number, height: number) {
     this.width = width;
@@ -18,6 +19,7 @@ export class Display {
     this.tetromino = null!;
     this.lastThreeIndexesArr = [];
     this.generateTetrominoIndex();
+    this.isLost = false;
   }
 
   public initCells() {
@@ -45,6 +47,7 @@ export class Display {
       newDisplay.tetromino.display = newDisplay;
     }
     newDisplay.lastThreeIndexesArr = this.lastThreeIndexesArr;
+    newDisplay.isLost = this.isLost;
     return newDisplay;
   }
 

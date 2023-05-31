@@ -10,6 +10,7 @@ import Timer from './components/Timer';
 import PlayButton from './components/PlayButton';
 
 import { DISPLAY_HEIGHT, DISPLAY_WIDTH, TETROMINO_DROP_TIME } from './setup';
+import Modal from './components/Modal';
 
 const App = () => {
   const [isStarted, setIsStarted] = useState(false);
@@ -33,6 +34,14 @@ const App = () => {
     return Math.floor(display.clearedRows / 10);
   }, [display.clearedRows]);
 
+  const isGameStopped = useMemo(() => {
+    return !isStarted || display.isLost || isPaused;
+  }, [isStarted, isPaused, display.isLost]);
+
+  const isModalOpen = useMemo(() => {
+    return display.isLost;
+  }, [display.isLost]);
+
   useEffect(() => {
     if (!isStarted) {
       display.initCells();
@@ -42,7 +51,7 @@ const App = () => {
 
   useInterval(() => {
     moveTetromino();
-  }, isPaused ? null : dropTime);
+  }, isGameStopped ? null : dropTime);
 
   const update = useCallback(() => {
     const newDisplay = display.getCopyDisplay();
@@ -55,6 +64,7 @@ const App = () => {
   }, [display, update]);
 
   const start = useCallback(() => {
+    display.isLost = false;
     setIsStarted(true);
     setIsPaused(false);
     setTime(0);
@@ -90,7 +100,7 @@ const App = () => {
     if (e.key === 'p' || e.key === 'з') {
       setIsPaused(!isPaused);
     }
-    if (!isStarted || isPaused) return;
+    if (isGameStopped) return;
 
     if (e.key === 'ArrowDown') {
       arrowDownHandler();
@@ -104,7 +114,7 @@ const App = () => {
     if (e.key === 'ArrowUp') {
       arrowUpHandler();
     }
-  }, [isPaused, isStarted, arrowUpHandler, arrowRightHandler, arrowDownHandler, arrowLeftHandler]);
+  }, [isPaused, isGameStopped, arrowUpHandler, arrowRightHandler, arrowDownHandler, arrowLeftHandler]);
 
   const keyUpHandler = (e: React.KeyboardEvent) => {
     if (e.key === 'ArrowDown') {
@@ -113,16 +123,15 @@ const App = () => {
   };
 
   const moveTetromino = useCallback(() => {
-    if (!isStarted || isPaused) return;
     display.tetromino.moveDown();
     if (display.tetromino.landed) {
       createTetromino();
     }
     update();
-  }, [isStarted, isPaused, display, update, createTetromino]);
+  }, [display, update, createTetromino]);
 
   const touchStartHandler = useCallback((e: React.TouchEvent<HTMLDivElement>) => {
-    if (!isStarted || isPaused) return;
+    if (isGameStopped) return;
 
     setTouchPoints([
       {
@@ -134,10 +143,10 @@ const App = () => {
         y: e.changedTouches[0].clientY,
       }
     ]);
-  }, [isStarted, isPaused]);
+  }, [isGameStopped]);
 
   const touchMoveHandler = useCallback((e: React.TouchEvent<HTMLDivElement>) => {
-    if (!isStarted || isPaused) return;
+    if (isGameStopped) return;
 
     setTouchPoints(prev => [
       {
@@ -166,10 +175,10 @@ const App = () => {
     } else {
       setDropTime(TETROMINO_DROP_TIME);
     }
-  }, [isStarted, isPaused, touchPoints, movingXRatio, arrowRightHandler, arrowLeftHandler]);
+  }, [isGameStopped, touchPoints, movingXRatio, arrowRightHandler, arrowLeftHandler]);
 
   const touchEndHandler = useCallback(() => {
-    if (!isStarted || isPaused) return;
+    if (isGameStopped) return;
 
     setDropTime(TETROMINO_DROP_TIME);
 
@@ -177,14 +186,31 @@ const App = () => {
       arrowUpHandler();
       return;
     }
-  }, [isStarted, isPaused, touchPoints, arrowUpHandler]);
+
+    setTouchPoints([
+      {
+        x: 0,
+        y: 0,
+      },
+      {
+        x: 0,
+        y: 0,
+      }
+    ]);
+  }, [isGameStopped, touchPoints, arrowUpHandler]);
 
   return (
     <div className="flex items-center justify-center min-h-screen" tabIndex={-1} onKeyDown={keyDownHandler} onKeyUp={keyUpHandler}>
+      <Modal isOpen={isModalOpen} onClose={() => {display.isLost = false}}>
+        <div className="text-center">
+          <h2 className="text-red-400 text-xl font-bold">You lost</h2>
+          <button onClick={start}>Restart</button>
+        </div>
+      </Modal>
       <div className="flex">
         <div>
           <div className="flex items-center justify-center gap-2 mb-6">
-            {isStarted && <Timer time={time} setTime={setTime} isPaused={isPaused} />}
+            {isStarted && <Timer time={time} setTime={setTime} isStopped={isGameStopped} />}
             <PlayButton
               isPaused={isPaused}
               switchFn={() => !isStarted ? start() : setIsPaused(!isPaused)}
@@ -205,6 +231,8 @@ const App = () => {
             <DisplayComponent display={display} setDisplay={setDisplay} />
           </div>
         </div>
+
+        {/* Боковая панель */}
         {isStarted && <motion.div
           className="flex flex-col items-center gap-12 mt-[72px] overflow-hidden"
           initial={{ maxWidth: 0, marginLeft: 0 }}

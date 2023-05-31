@@ -18,7 +18,15 @@ export class Tetromino {
     this.turnsArr = turnsArr;
     this.tetrominoCells = turnsArr[0]
       .map(cell => this.display.getCell(cell.x, cell.y))
+      .map(cell => {
+        if (cell.color !== EColors.BLACK && !this.display.isLost) {
+          console.log("Игра проиграна");
+          this.display.isLost = true;
+        }
+        return cell;
+      })
       .map((cell, index) => {
+        if (this.display.isLost) return cell;
         if (index === 0 && this.name === 'O') {
           cell.color = EColors.YELLOW;
         } else {

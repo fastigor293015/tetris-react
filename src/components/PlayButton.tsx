@@ -17,7 +17,7 @@ const PlayButton: React.FC<PlayButtonProps> = ({
       initial={{ width: 0 }}
       animate={{ width: text ? "100%" : "48px" }}
       transition={{ delay: .3, duration: .3, type: "keyframes" }}
-      className={`flex items-center justify-center h-12 border border-white rounded-lg text-white bg-black overflow-hidden`}
+      className="flex items-center justify-center h-12 border border-white rounded-lg text-white bg-black overflow-hidden"
       onClick={() => switchFn()}
     >
       {text ? (

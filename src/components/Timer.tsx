@@ -6,14 +6,14 @@ import useInterval from "../hooks/useInterval";
 interface TimerProps {
   time: number;
   setTime: React.Dispatch<React.SetStateAction<number>>;
-  isPaused: boolean;
+  isStopped: boolean;
 }
 
-const Timer: FC<TimerProps> = ({ time, setTime, isPaused }) => {
+const Timer: FC<TimerProps> = ({ time, setTime, isStopped }) => {
 
   useInterval(() => {
     setTime(prev => prev + 1);
-  }, isPaused ? null : 1000);
+  }, isStopped ? null : 1000);
 
   const formatTime = useCallback(() => {
     const min = Math.floor(time / 60),

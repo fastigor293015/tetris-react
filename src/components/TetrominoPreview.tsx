@@ -21,7 +21,7 @@ const TetrominoPreview: FC<TetrominoPreviewProps> = ({ nextTetrominoIndex }) => 
           <React.Fragment key={index}>
             {
               row.map((cell, i) =>
-                <AnimatePresence>
+                <AnimatePresence key={`${cell}-${i}`}>
                   <motion.div
                     key={`${nextTetrominoIndex}-${i}`}
                     className={`flex items-center justify-center bg-black ${cell === 1 ? TETROMINOS[nextTetrominoIndex].color : EColors.BLACK}`}
