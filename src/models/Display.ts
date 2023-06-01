@@ -10,6 +10,7 @@ export class Display {
   tetromino: Tetromino;
   lastThreeIndexesArr: Array<number>;
   clearedRows: number;
+  score: number;
   isLost: boolean;
 
   constructor(width: number, height: number) {
@@ -18,8 +19,9 @@ export class Display {
     this.clearedRows = 0;
     this.tetromino = null!;
     this.lastThreeIndexesArr = [];
-    this.generateTetrominoIndex();
+    this.score = 0;
     this.isLost = false;
+    this.generateTetrominoIndex();
   }
 
   public initCells() {
@@ -41,6 +43,7 @@ export class Display {
     const newDisplay = new Display(this.width, this.height);
     newDisplay.cells = this.cells;
     newDisplay.clearedRows = this.clearedRows;
+    newDisplay.score = this.score;
     newDisplay.tetromino = this.tetromino;
     // Назначаем для tetromino новый контекст newDisplay
     if (newDisplay.tetromino?.display) {
@@ -99,6 +102,8 @@ export class Display {
     if (clearedRowsIndexes.length === 0) {
       return;
     }
+
+    this.score += clearedRowsIndexes.length * 100;
 
     for (let r = 0; r < clearedRowsIndexes.length; r++) {
 

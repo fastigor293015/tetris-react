@@ -11,7 +11,7 @@ const TetrominoPreview: FC<TetrominoPreviewProps> = ({ nextTetrominoIndex }) => 
 
   return (
     <motion.div
-      className="flex items-center justify-center w-[100px] h-[100px] border border-white rounded-lg bg-black"
+      className="flex items-center justify-center w-[100px] h-[100px] border border-white rounded-lg bg-black overflow-hidden"
       initial={{ opacity: 0, scale: 0 }}
       animate={{ opacity: 1, scale: "100%" }}
       transition={{ type: "keyframes", delay: .2, duration: .3 }}

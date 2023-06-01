@@ -8,9 +8,9 @@ import DisplayComponent from './components/DisplayComponent';
 import TetrominoPreview from './components/TetrominoPreview';
 import Timer from './components/Timer';
 import PlayButton from './components/PlayButton';
+import Modal from './components/Modal';
 
 import { DISPLAY_HEIGHT, DISPLAY_WIDTH, TETROMINO_DROP_TIME } from './setup';
-import Modal from './components/Modal';
 
 const App = () => {
   const [isStarted, setIsStarted] = useState(false);
@@ -65,12 +65,15 @@ const App = () => {
 
   const start = useCallback(() => {
     display.isLost = false;
+    display.score = 0;
+    display.clearedRows = 0;
     setIsStarted(true);
     setIsPaused(false);
     setTime(0);
 
     const newDisplay = new Display(DISPLAY_WIDTH, DISPLAY_HEIGHT);
     setDisplay(newDisplay);
+    console.log("СТАРТУЕМ: ", display);
     display.initCells();
 
     createTetromino();
@@ -123,12 +126,15 @@ const App = () => {
   };
 
   const moveTetromino = useCallback(() => {
+    if (dropTime === TETROMINO_DROP_TIME / 15) {
+      display.score++;
+    }
     display.tetromino.moveDown();
     if (display.tetromino.landed) {
       createTetromino();
     }
     update();
-  }, [display, update, createTetromino]);
+  }, [dropTime, display, update, createTetromino]);
 
   const touchStartHandler = useCallback((e: React.TouchEvent<HTMLDivElement>) => {
     if (isGameStopped) return;
@@ -202,9 +208,10 @@ const App = () => {
   return (
     <div className="flex items-center justify-center min-h-screen" tabIndex={-1} onKeyDown={keyDownHandler} onKeyUp={keyUpHandler}>
       <Modal isOpen={isModalOpen} onClose={() => {display.isLost = false}}>
-        <div className="text-center">
-          <h2 className="text-red-400 text-xl font-bold">You lost</h2>
-          <button onClick={start}>Restart</button>
+        <div className="min-w-[200px] text-center">
+          <h2 className="mb-3 text-red-400 text-xl font-bold">You lost</h2>
+          <p className="mb-3">Score: {display.score}</p>
+          <button className="py-3 px-4 rounded-lg text-white bg-black" onClick={start}>Restart</button>
         </div>
       </Modal>
       <div className="flex">
@@ -247,7 +254,7 @@ const App = () => {
               transition={{ type: "keyframes", delay: .3, duration: .3 }}
               className="flex items-center justify-center h-12 w-32 border border-white rounded-lg text-white bg-black"
             >
-              Score: {level}
+              Score: {display.score}
             </motion.div>
             <motion.div
               className="flex items-center justify-center h-12 border border-white rounded-lg text-white bg-black"
