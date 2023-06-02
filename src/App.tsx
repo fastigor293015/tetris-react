@@ -61,13 +61,15 @@ const App = () => {
   }, []);
 
   useEffect(() => {
-    if (display.lastCombo > 0 && lastCombo !== display.lastCombo) {
+    if (display.clearedRows === 0 || lastCombo === display.lastCombo) return;
+
+    if (display.lastCombo > 0) {
       setLastCombo(lastCombo);
       console.log("Устанавливаю бонус")
       setBonus(SCORE_COUNT[display.lastCombo - 1] * (display.level <= 1 ? 1 : display.level));
     }
 
-    if (Math.floor(display.clearedRows / ROWS_FOR_LEVELUP) !== Math.floor((display.clearedRows - display.lastCombo) / ROWS_FOR_LEVELUP) &&  lastCombo !== display.lastCombo) {
+    if (Math.floor(display.clearedRows / ROWS_FOR_LEVELUP) !== Math.floor((display.clearedRows - display.lastCombo) / ROWS_FOR_LEVELUP)) {
       setLevelup(true);
     }
   }, [display.clearedRows, lastCombo]);
@@ -268,6 +270,8 @@ const App = () => {
           </div>
           <div className="relative" onTouchStart={touchStartHandler} onTouchMove={touchMoveHandler} onTouchEnd={touchEndHandler}>
             <DisplayComponent display={display} setDisplay={setDisplay} />
+
+            {/* Алерты */}
             <AnimatePresence>
               {bonus !== 0 && (
                 <motion.div
