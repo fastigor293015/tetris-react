@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
-import { motion } from 'framer-motion';
+import { AnimatePresence, motion } from 'framer-motion';
 import { VscDebugRestart } from "react-icons/vsc";
 import useInterval from './hooks/useInterval';
 import { Display } from './models/Display';
@@ -10,12 +10,16 @@ import Timer from './components/Timer';
 import PlayButton from './components/PlayButton';
 import Modal from './components/Modal';
 
-import { DISPLAY_HEIGHT, DISPLAY_WIDTH, TETROMINO_DROP_TIME } from './setup';
+import { DISPLAY_HEIGHT, DISPLAY_WIDTH, ROWS_FOR_LEVELUP, SCORE_COUNT, TETROMINO_DROP_TIME } from './setup';
+import useTimeout from './hooks/useTimeout';
 
 const App = () => {
   const [isStarted, setIsStarted] = useState(false);
   const [isPaused, setIsPaused] = useState(false);
   const [display, setDisplay] = useState(new Display(DISPLAY_WIDTH, DISPLAY_HEIGHT));
+  const [lastCombo, setLastCombo] = useState(0);
+  const [bonus, setBonus] = useState(0);
+  const [levelup, setLevelup] = useState(false);
   const [time, setTime] = useState(0);
   const [dropTime, setDropTime] = useState(TETROMINO_DROP_TIME);
   const [touchPoints, setTouchPoints] = useState([
@@ -30,9 +34,16 @@ const App = () => {
   ]);
   const [movingXRatio, setMovingXRatio] = useState(0);
 
-  const level = useMemo(() => {
-    return Math.floor(display.clearedRows / 10);
-  }, [display.clearedRows]);
+  const normalDropTime = useMemo(() => {
+    return Math.pow(
+      TETROMINO_DROP_TIME / 1000 - ((display.level <= 1 ? 1 : display.level) - 1) * 0.007,
+      display.level - 1
+    ) * 1000;
+  }, [display]);
+
+  const boostedDropTime = useMemo(() => {
+    return normalDropTime / 15;
+  }, [normalDropTime]);
 
   const isGameStopped = useMemo(() => {
     return !isStarted || display.isLost || isPaused;
@@ -49,9 +60,29 @@ const App = () => {
     }
   }, []);
 
+  useEffect(() => {
+    if (display.lastCombo > 0 && lastCombo !== display.lastCombo) {
+      setLastCombo(lastCombo);
+      console.log("Устанавливаю бонус")
+      setBonus(SCORE_COUNT[display.lastCombo - 1] * (display.level <= 1 ? 1 : display.level));
+    }
+
+    if (Math.floor(display.clearedRows / ROWS_FOR_LEVELUP) !== Math.floor((display.clearedRows - display.lastCombo) / ROWS_FOR_LEVELUP) &&  lastCombo !== display.lastCombo) {
+      setLevelup(true);
+    }
+  }, [display.clearedRows, lastCombo]);
+
   useInterval(() => {
     moveTetromino();
   }, isGameStopped ? null : dropTime);
+
+  useTimeout(() => {
+    setBonus(0);
+  }, bonus > 0 ? 1000 : null);
+
+  useTimeout(() => {
+    setLevelup(false);
+  }, levelup ? 1000 : null);
 
   const update = useCallback(() => {
     const newDisplay = display.getCopyDisplay();
@@ -66,6 +97,7 @@ const App = () => {
   const start = useCallback(() => {
     display.isLost = false;
     display.score = 0;
+    display.level = 0;
     display.clearedRows = 0;
     setIsStarted(true);
     setIsPaused(false);
@@ -90,9 +122,9 @@ const App = () => {
   }, [update, display]);
 
   const arrowDownHandler = useCallback(() => {
-    setDropTime(TETROMINO_DROP_TIME / 15);
+    setDropTime(boostedDropTime);
     update();
-  }, [update]);
+  }, [update, boostedDropTime]);
 
   const arrowLeftHandler = useCallback(() => {
     display.tetromino.moveLeft();
@@ -121,12 +153,12 @@ const App = () => {
 
   const keyUpHandler = (e: React.KeyboardEvent) => {
     if (e.key === 'ArrowDown') {
-      setDropTime(TETROMINO_DROP_TIME);
+      setDropTime(normalDropTime);
     }
   };
 
   const moveTetromino = useCallback(() => {
-    if (dropTime === TETROMINO_DROP_TIME / 15) {
+    if (dropTime === boostedDropTime) {
       display.score++;
     }
     display.tetromino.moveDown();
@@ -134,7 +166,7 @@ const App = () => {
       createTetromino();
     }
     update();
-  }, [dropTime, display, update, createTetromino]);
+  }, [dropTime, boostedDropTime, display, update, createTetromino]);
 
   const touchStartHandler = useCallback((e: React.TouchEvent<HTMLDivElement>) => {
     if (isGameStopped) return;
@@ -177,16 +209,16 @@ const App = () => {
     setMovingXRatio(newMovingXRatio);
 
     if (dy > 30) {
-      setDropTime(TETROMINO_DROP_TIME / 15);
+      setDropTime(boostedDropTime);
     } else {
-      setDropTime(TETROMINO_DROP_TIME);
+      setDropTime(normalDropTime);
     }
-  }, [isGameStopped, touchPoints, movingXRatio, arrowRightHandler, arrowLeftHandler]);
+  }, [boostedDropTime, normalDropTime, isGameStopped, touchPoints, movingXRatio, arrowRightHandler, arrowLeftHandler]);
 
   const touchEndHandler = useCallback(() => {
     if (isGameStopped) return;
 
-    setDropTime(TETROMINO_DROP_TIME);
+    setDropTime(normalDropTime);
 
     if (touchPoints[0].x === touchPoints[1].x && touchPoints[0].y === touchPoints[1].y) {
       arrowUpHandler();
@@ -203,7 +235,7 @@ const App = () => {
         y: 0,
       }
     ]);
-  }, [isGameStopped, touchPoints, arrowUpHandler]);
+  }, [normalDropTime, isGameStopped, touchPoints, arrowUpHandler]);
 
   return (
     <div className="flex items-center justify-center min-h-screen" tabIndex={-1} onKeyDown={keyDownHandler} onKeyUp={keyUpHandler}>
@@ -234,14 +266,38 @@ const App = () => {
               <VscDebugRestart size={24} />
             </motion.button>}
           </div>
-          <div onTouchStart={touchStartHandler} onTouchMove={touchMoveHandler} onTouchEnd={touchEndHandler}>
+          <div className="relative" onTouchStart={touchStartHandler} onTouchMove={touchMoveHandler} onTouchEnd={touchEndHandler}>
             <DisplayComponent display={display} setDisplay={setDisplay} />
+            <AnimatePresence>
+              {bonus !== 0 && (
+                <motion.div
+                  key={`${display.clearedRows} - ${bonus}`}
+                  initial={{ opacity: 0, y: 100, x: "-50%" }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -100 }}
+                  className="absolute bottom-1/2 left-1/2 text-green-200 text-3xl font-bold"
+                >
+                  +{bonus}
+                </motion.div>
+              )}
+              {levelup && (
+                <motion.div
+                  key={`${display.clearedRows} - ${levelup}`}
+                  initial={{ opacity: 0, y: 100, x: "-50%" }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -100 }}
+                  className="absolute bottom-[calc(50%+50px)] left-1/2 text-pink-200 text-4xl font-bold"
+                >
+                  LEVELUP!
+                </motion.div>
+              )}
+            </AnimatePresence>
           </div>
         </div>
 
         {/* Боковая панель */}
         {isStarted && <motion.div
-          className="flex flex-col items-center gap-12 mt-[72px] overflow-hidden"
+          className="relative flex flex-col items-center gap-12 mt-[72px] overflow-hidden"
           initial={{ maxWidth: 0, marginLeft: 0 }}
           animate={{ maxWidth: 1000, marginLeft: 24 }}
           transition={{ delay: .2, duration: .4, type: "keyframes" }}
@@ -268,7 +324,7 @@ const App = () => {
               animate={{ opacity: 1, x: 0 }}
               transition={{ type: "keyframes", delay: .7, duration: .3 }}
             >
-              Level: {level}
+              Level: {display.level}
             </motion.div>
           </div>
         </motion.div>}

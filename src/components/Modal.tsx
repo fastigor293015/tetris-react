@@ -28,7 +28,6 @@ const Modal: React.FC<ModalProps> = ({ isOpen, onClose, children }) => {
         }}
       >
         <motion.div
-          // key="modal-content"
           initial={{ opacity: 0, scale: 0 }}
           animate={{ opacity: 1, scale: "100%" }}
           exit={{ opacity: 0, scale: 0 }}

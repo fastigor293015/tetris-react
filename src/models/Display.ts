@@ -1,4 +1,4 @@
-import { TETROMINOS } from "../setup";
+import { ROWS_FOR_LEVELUP, SCORE_COUNT, TETROMINOS } from "../setup";
 import { Cell } from "./Cell";
 import { EColors } from "./EColors";
 import { Tetromino } from "./Tetromino";
@@ -11,6 +11,8 @@ export class Display {
   lastThreeIndexesArr: Array<number>;
   clearedRows: number;
   score: number;
+  level: number
+  lastCombo: number;
   isLost: boolean;
 
   constructor(width: number, height: number) {
@@ -20,6 +22,8 @@ export class Display {
     this.tetromino = null!;
     this.lastThreeIndexesArr = [];
     this.score = 0;
+    this.level = 0;
+    this.lastCombo = 0;
     this.isLost = false;
     this.generateTetrominoIndex();
   }
@@ -44,6 +48,8 @@ export class Display {
     newDisplay.cells = this.cells;
     newDisplay.clearedRows = this.clearedRows;
     newDisplay.score = this.score;
+    newDisplay.level = this.level;
+    newDisplay.lastCombo = this.lastCombo;
     newDisplay.tetromino = this.tetromino;
     // Назначаем для tetromino новый контекст newDisplay
     if (newDisplay.tetromino?.display) {
@@ -103,7 +109,9 @@ export class Display {
       return;
     }
 
-    this.score += clearedRowsIndexes.length * 100;
+    this.lastCombo = clearedRowsIndexes.length;
+    this.score += SCORE_COUNT[this.lastCombo - 1] * (this.level <= 1 ? 1 : this.level);
+    this.level = Math.floor(this.clearedRows / ROWS_FOR_LEVELUP);
 
     for (let r = 0; r < clearedRowsIndexes.length; r++) {
 
