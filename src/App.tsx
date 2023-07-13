@@ -65,7 +65,6 @@ const App = () => {
 
     if (display.lastCombo > 0) {
       setLastCombo(lastCombo);
-      console.log("Устанавливаю бонус")
       setBonus(SCORE_COUNT[display.lastCombo - 1] * (display.level <= 1 ? 1 : display.level));
     }
 
@@ -107,7 +106,6 @@ const App = () => {
 
     const newDisplay = new Display(DISPLAY_WIDTH, DISPLAY_HEIGHT);
     setDisplay(newDisplay);
-    console.log("СТАРТУЕМ: ", display);
     display.initCells();
 
     createTetromino();
