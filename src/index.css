@@ -13,8 +13,24 @@ body,
 
 body {
   font-family: 'Montserrat', sans-serif;
-  background: rgba(0, 0, 0, .4) url(./assets/img/neon-bg.jpg) center center no-repeat;
+  background: url(/images/neon-bg.jpg) center center no-repeat;
   background-size: cover;
   background-attachment: fixed;
   background-blend-mode: multiply;
+  animation: blur 10s infinite ease-in-out;
+}
+
+@keyframes blur {
+  0% {
+    backdrop-filter: brightness(.6);
+  }
+
+  50% {
+    backdrop-filter: brightness(.6) blur(5px);
+  }
+
+  100% {
+    backdrop-filter: brightness(.6);
+  }
+
 }
